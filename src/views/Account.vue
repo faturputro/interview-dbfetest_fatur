@@ -26,12 +26,15 @@
           class="input-with-select"
         >
           <template #append>
-            <el-button @click="fetchAccounts">Search</el-button>
+            <el-button @click="searchAccount">Search</el-button>
           </template>
         </el-input>
       </div>
+      <div class="w-1/5">
+        <el-button type="primary" class="w-full mr-2">Add Account</el-button>
+      </div>
     </div>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table :data="tableData" style="width: 100%" class="mt-4">
       <el-table-column prop="name" label="Name" width="180" />
       <el-table-column prop="number" label="Number" />
       <el-table-column prop="balance" label="Balance" />
@@ -67,6 +70,9 @@ export default {
     }
   },
   created() {
+    if (this.$route.query.q) {
+      this.searchVal = this.$route.query.q
+    }
     this.fetchAccounts()
   },
   methods: {
@@ -82,6 +88,10 @@ export default {
       } catch (e) {
         // 
       }
+    },
+    async searchAccount() {
+      this.$router.push({ name: 'Account', query: { q: this.searchVal } })
+      await this.fetchAccounts()
     },
     async closeAccount(id) {
       try {
