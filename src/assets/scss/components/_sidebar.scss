@@ -1,0 +1,45 @@
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 245px;
+  height: 100vh;
+  overflow-y: hidden;
+  background-color: #0e0f19;
+}
+
+.sidebar-links {
+  .sidebar-link__item {
+    display: inline-block;
+    position: relative;
+    color: #ffffff;
+    opacity: 0.54;
+    transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &.router-link-exact-active {
+      opacity: 1;
+
+      &::before {
+        content: '';
+        position: absolute;
+        display: inline-block;
+        width: 3px;
+        height: 2rem;
+        background-color: #1db3ce;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  li .el-collapse {
+    background-color: none !important;
+    background: none !important;
+    border: none !important;
+  }
+}
