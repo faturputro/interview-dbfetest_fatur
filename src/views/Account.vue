@@ -3,23 +3,6 @@
     <page-header title="Accounts" description="Create or view account"></page-header>
     <div class="flex flex-col lg:flex-row xl:flex-row items-center justify-between">
       <div class="w-1/2">
-        <!-- <el-input
-          v-model="searchVal"
-          placeholder="Search account"
-          class="input-with-select"
-        >
-          <template #prepend>
-            <el-select v-model="typeKey" placeholder="Type" style="width: 115px;">
-              <el-option label="All" value="" />
-              <el-option label="Incoming" value="incoming" />
-              <el-option label="Outgoing" value="outgoing" />
-              <el-option label="Internal" value="internal" />
-            </el-select>
-          </template>
-          <template #append>
-            <el-button>Search</el-button>
-          </template>
-        </el-input> -->
         <el-input
           v-model="searchVal"
           placeholder="Search account"
@@ -30,8 +13,8 @@
           </template>
         </el-input>
       </div>
-      <div class="w-1/5">
-        <el-button type="primary" class="w-full mr-2">Add Account</el-button>
+      <div class="w-48">
+        <el-button type="primary" class="w-full mr-2" @click="newAccount">Add Account</el-button>
       </div>
     </div>
     <el-table :data="tableData" style="width: 100%" class="mt-4">
@@ -41,7 +24,7 @@
       <el-table-column label="Action" width="180">
         <template #default="scope">
           <div class="flex">
-            <el-button type="info" size="small">Edit</el-button>
+            <el-button type="info" size="small" @click="fetchAccountDetails(scope.row)">Edit</el-button>
             <el-popconfirm :title="`Close account number ${scope.row.number}?`" @confirm="closeAccount(scope.row.id)">
               <template #reference>
                 <el-button type="danger" size="small" :disabled="scope.row.balance !== 0">Close</el-button>
@@ -51,6 +34,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <add-edit-account
+      v-model="dialogVisible"
+      :is-new="isNew"
+      :details="accountDetails"
+      @submit="submitDetails"
+      @close="dialogVisible = false"
+    ></add-edit-account>
   </div>
 </template>
 
@@ -58,15 +48,22 @@
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import AccountService from '../services/account'
+import AddEditAccount from '../components/AddEditAccount.vue'
 
 export default {
   components: {
     Search,
+    AddEditAccount,
   },
   data() {
     return {
       searchVal: '',
       tableData: [],
+      accountDetails: {
+        name: '',
+      },
+      dialogVisible: false,
+      isNew: true,
     }
   },
   created() {
@@ -102,8 +99,40 @@ export default {
           type: 'success',
         });
       } catch (e) {
-        // 
+        // do nothing
       }
+    },
+    newAccount() {
+      this.dialogVisible = true
+      this.isNew = true
+    },
+    async submitDetails() {
+      try {
+        const payload = {
+          data: {
+            id: !this.isNew ? this.accountDetails.id : null,
+            name: this.accountDetails.name
+          },
+        }
+        if (this.isNew) {
+          await AccountService.createAccount(payload)
+        } else {
+          await AccountService.updateAccount(payload.data.id, payload)
+        }
+        ElMessage({
+          message: `Account successfully ${this.isNew ? 'created' : 'updated'}.`,
+          type: 'success',
+        });
+        this.dialogVisible = false
+        this.fetchAccounts()
+      } catch (e) {
+        // do nothing
+      }
+    },
+    fetchAccountDetails(row) {
+      this.dialogVisible = true
+      this.isNew = false
+      this.accountDetails = { ...row }
     },
   },
 };
